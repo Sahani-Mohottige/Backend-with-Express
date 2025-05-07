@@ -29,7 +29,13 @@ res.send(course);
 
 app.post('/api/courses',(req,res)=>{
 
-    const schema = Joi.object({
+  const {error} = validateCourse(req.body);  //result.error = {error} 
+  if(error){
+    res.status(400).send(error.details[0].message);
+    return;
+  }
+
+   /* const schema = Joi.object({
       name: Joi.string().min(3).required()
     });
     
@@ -39,6 +45,7 @@ app.post('/api/courses',(req,res)=>{
       res.status(400).send(result.error.details[0].message);
       return;
     }
+      */
 /*
       { }
 
@@ -66,6 +73,66 @@ app.post('/api/courses',(req,res)=>{
     res.send(course);
 });
     
+
+app.put('/api/courses/:id', (req,res) =>{
+  //look for the course
+  //If not existing , return 404
+  const course = courses.find(c =>c.id === parseInt(req.params.id));
+  if(!course) res.status(404).send("Course not found");
+  
+  //validate
+  //If invalid, return 400 - Bad request 
+ 
+  //with object distructure
+  
+  const {error} = validateCourse(req.body);  //result.error = {error} 
+  if(error){
+    res.status(400).send(error.details[0].message);
+    return;
+  }
+/*
+  - same without object distructure
+
+  const result = validateCourse(req.body);
+
+  if(result.error){
+    res.status(400).send(result.error.details[0].message);
+    return;
+  }
+*/
+
+  //update courses
+  course.name = req.body.name;
+  // return the updated course
+  res.send(course);
+  });
+  
+  function validateCourse(course){
+    const schema = Joi.object({
+      name: Joi.string().min(3).required()
+    });
+    
+    return schema.validate(course);
+  
+  }
+
+
+app.delete('/api/courses/:id', (req,res)=>{
+  //look up for the course
+  //if doesn't exist return 404
+  const course = courses.find(c =>c.id === parseInt(req.params.id));
+  if(!course) res.status(404).send("Course not found");
+
+  //Delete
+  const index = courses.indexOf(course);
+  courses.splice(index,1);
+
+  //return same course 
+console.log("course deleted.");
+res.send(course);
+});
+
+
 
 
 
